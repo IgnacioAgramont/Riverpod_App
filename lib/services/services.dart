@@ -1,21 +1,26 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 import '../models/dogimage_model.dart';
 
-class ApiServices {
+class DogNotifier extends StateNotifier<String> {
+  DogNotifier() : super('');
+  
   String endpoint = "https://dog.ceo/api/breeds/image/random";
-  Future<List<DogImage>> getImg() async {
-    Response response = await get(Uri.parse(endpoint));
+  Future<void> getImg() async {
+    final response = await http.get(Uri.parse(endpoint));
+
     if (response.statusCode == 200) {
-      final List result = jsonDecode(response.body)['message'];
-      return result.map((e) => DogImage.fromJson(e)).toList();
+      final json = jsonDecode(response.body)['message'];
+      //final List result = jsonDecode(response.body)['message'];
+      //return result.map((e) => DogImage.fromJson(e)).toList();
+      state = json;
     } else {
       throw Exception(response.reasonPhrase);
     }
   }
 }
 
-final dogProvider = Provider<ApiServices>((ref) => ApiServices());
+final dogProvider = StateNotifierProvider<DogNotifier, String>((ref) => DogNotifier());
